@@ -2647,6 +2647,8 @@ const OneSignalManager = (() => {
       window.OneSignalDeferred.push(async (OneSignal) => {
         await OneSignal.init({
           appId: APP_ID,
+          serviceWorkerPath: 'sw.js',
+          serviceWorkerParam: { scope: './' },
           notifyButton: { enable: false },
           allowLocalhostAsSecureOrigin: true,
         });
