@@ -1000,6 +1000,19 @@ function save() {} // no-op, kept for safety
 function fmt(n) { return 'Rp ' + (n||0).toLocaleString('id-ID'); }
 function today() { return new Date().toISOString().split('T')[0]; }
 
+// ====== TITLE CASE INPUT ======
+function applyTitleCase(el) {
+  const pos = el.selectionStart;
+  el.value = el.value.replace(/\b\w/g, c => c.toUpperCase());
+  el.setSelectionRange(pos, pos);
+}
+function bindTitleCase(...ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', () => applyTitleCase(el));
+  });
+}
+
 // ====== FORMAT RUPIAH INPUT ======
 function formatRupiahInput(input) {
   let value = input.value.replace(/[^0-9]/g, '');
@@ -2358,6 +2371,7 @@ loadAll().then(() => {
   const startPage = isMobile() ? 'dashboard' : 'transaksi';
   showPage(startPage);
   initNotifikasi();
+  bindTitleCase('vmNama','vmKet','vmAlamat','pNama','vNama','vKet','rKet');
 });
 
 // ====== PWA: SERVICE WORKER ======
