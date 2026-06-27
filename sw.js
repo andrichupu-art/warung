@@ -1,23 +1,14 @@
-// KasirPro Service Worker — Network First Strategy
+// KasirPro Service Worker — Network First + OneSignal Push
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
+
 const CACHE_NAME = 'kasirpro-v1';
 const STATIC_CACHE = 'kasirpro-static-v1';
-
-// Asset statis yang di-cache saat install
-const STATIC_ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap',
-];
 
 // ====== INSTALL ======
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing KasirPro SW...');
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
-      // Cache asset lokal dulu, eksternal boleh gagal
       return cache.addAll(['./index.html', './manifest.json']).catch(() => {});
     }).then(() => self.skipWaiting())
   );
@@ -50,7 +41,10 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Untuk request POST/PUT/DELETE — jangan di-cache
+  // OneSignal — biarkan SW OneSignal yang handle
+  if (url.hostname.includes('onesignal.com')) return;
+
+  // POST/PUT/DELETE — jangan di-cache
   if (event.request.method !== 'GET') {
     event.respondWith(fetch(event.request));
     return;
@@ -60,11 +54,9 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Simpan ke cache jika berhasil
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            // Hanya cache asset statis (bukan API calls)
             if (
               url.hostname === self.location.hostname ||
               url.hostname === 'cdn.tailwindcss.com' ||
@@ -80,13 +72,11 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // Network gagal — fallback ke cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             console.log('[SW] Serving from cache (offline):', event.request.url);
             return cachedResponse;
           }
-          // Kalau request HTML dan tidak ada cache, return halaman offline sederhana
           if (event.request.headers.get('accept')?.includes('text/html')) {
             return new Response(
               `<!DOCTYPE html>
@@ -122,22 +112,9 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// ====== BACKGROUND SYNC (optional future use) ======
+// ====== BACKGROUND SYNC ======
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-transaksi') {
     console.log('[SW] Background sync: transaksi');
-    // Future: queue offline transactions
   }
-});
-
-// ====== PUSH NOTIFICATION (optional future use) ======
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() || { title: 'KasirPro', body: 'Ada notifikasi baru.' };
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: './icon-192.png',
-      badge: './icon-192.png',
-    })
-  );
 });
