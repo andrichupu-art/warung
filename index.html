@@ -448,18 +448,21 @@
             <button onclick="renderLaba()" class="btn-primary text-white px-3 py-2 rounded-lg text-sm shrink-0"><i class="fas fa-filter"></i> Filter</button>
           </div>
         </div>
-        <div class="grid md:grid-cols-3 gap-4 mb-6">
-          <div class="gradient-card text-white p-6 rounded-2xl">
+        <div class="grid grid-cols-3 gap-2 md:gap-4 mb-6">
+          <div class="gradient-card text-white p-3 md:p-5 rounded-2xl">
+            <div class="hidden md:flex justify-between mb-3"><i class="fas fa-sack-dollar text-2xl opacity-80"></i></div>
             <p class="text-xs opacity-80">Total Penjualan</p>
-            <p class="text-3xl font-bold mt-2" id="labaSales">Rp 0</p>
+            <p class="text-base md:text-2xl font-bold mt-1 md:mt-1 leading-tight" id="labaSales">Rp 0</p>
           </div>
-          <div class="gradient-danger text-white p-6 rounded-2xl">
+          <div class="gradient-danger text-white p-3 md:p-5 rounded-2xl">
+            <div class="hidden md:flex justify-between mb-3"><i class="fas fa-arrow-trend-down text-2xl opacity-80"></i></div>
             <p class="text-xs opacity-80">Total HPP</p>
-            <p class="text-3xl font-bold mt-2" id="labaHpp">Rp 0</p>
+            <p class="text-base md:text-2xl font-bold mt-1 leading-tight" id="labaHpp">Rp 0</p>
           </div>
-          <div class="gradient-success text-white p-6 rounded-2xl">
+          <div class="gradient-success text-white p-3 md:p-5 rounded-2xl">
+            <div class="hidden md:flex justify-between mb-3"><i class="fas fa-chart-line text-2xl opacity-80"></i></div>
             <p class="text-xs opacity-80">Laba Bersih</p>
-            <p class="text-3xl font-bold mt-2" id="labaNet">Rp 0</p>
+            <p class="text-base md:text-2xl font-bold mt-1 leading-tight" id="labaNet">Rp 0</p>
           </div>
         </div>
         <div class="bg-white rounded-2xl p-6 shadow-sm">
