@@ -2637,42 +2637,60 @@ window.addEventListener('popstate', (e) => {
 const OneSignalManager = (() => {
   const APP_ID = '2c6265cf-fe87-42bf-863b-54cdfb0ab8cf';
   let _initialized = false;
+  let _initPromise = null;
 
   async function init() {
     if (_initialized) return;
-    if (typeof window.OneSignalDeferred === 'undefined') {
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-    }
-    await new Promise((resolve) => {
-      window.OneSignalDeferred.push(async (OneSignal) => {
-        await OneSignal.init({
-          appId: APP_ID,
-          serviceWorkerPath: 'sw.js',
-          serviceWorkerParam: { scope: './' },
-          notifyButton: { enable: false },
-          allowLocalhostAsSecureOrigin: true,
-        });
-        _initialized = true;
-        console.log('[OneSignal] Initialized');
+    if (_initPromise) return _initPromise; // sudah ada init berjalan, tunggu yang itu saja
 
-        // Observer: saat subscription ID muncul pertama kali
-        OneSignal.User.PushSubscription.addEventListener('change', (e) => {
-          const prev = e.previous?.id;
-          const curr = e.current?.id;
-          if (!prev && curr) {
-            console.log('[OneSignal] Subscription aktif:', curr);
-            refreshNotifUI();
-          }
-        });
+    _initPromise = new Promise((resolve) => {
+      if (typeof window.OneSignalDeferred === 'undefined') {
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+      }
+      window.OneSignalDeferred.push(async (OneSignal) => {
+        try {
+          await OneSignal.init({
+            appId: APP_ID,
+            serviceWorkerPath: 'sw.js',
+            serviceWorkerParam: { scope: './' },
+            notifyButton: { enable: false },
+            allowLocalhostAsSecureOrigin: true,
+          });
+          _initialized = true;
+          console.log('[OneSignal] Initialized');
+
+          // Observer: saat subscription ID muncul pertama kali
+          OneSignal.User.PushSubscription.addEventListener('change', (e) => {
+            const prev = e.previous?.id;
+            const curr = e.current?.id;
+            if (!prev && curr) {
+              console.log('[OneSignal] Subscription aktif:', curr);
+              refreshNotifUI();
+            }
+          });
+        } catch (err) {
+          console.error('[OneSignal] Init error:', err);
+        }
         resolve();
       });
     });
+
+    await _initPromise;
   }
 
   async function requestPermission() {
     await init();
-    await window.OneSignal.Notifications.requestPermission();
-    return window.OneSignal.Notifications.permission;
+    if (typeof window.OneSignal === 'undefined') {
+      console.error('[OneSignal] SDK gagal dimuat — cek koneksi/blokir adblock ke cdn.onesignal.com');
+      return false;
+    }
+    try {
+      await window.OneSignal.Notifications.requestPermission();
+      return window.OneSignal.Notifications.permission;
+    } catch (err) {
+      console.error('[OneSignal] requestPermission error:', err);
+      return false;
+    }
   }
 
   function isPermissionGranted() {
