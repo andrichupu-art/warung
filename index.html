@@ -13,6 +13,7 @@
 <title>KasirPro - Aplikasi Kasir Modern</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -475,6 +476,41 @@
       <div id="page-setting" class="page hidden">
         <h2 class="text-xl font-bold mb-1">Setting</h2>
         <p class="text-gray-500 text-sm mb-4">Kelola data master aplikasi</p>
+
+        <!-- Notifikasi Stok -->
+        <div class="bg-white rounded-2xl shadow-sm overflow-hidden mb-4">
+          <div class="p-5 border-b border-gray-100">
+            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-bell text-[#0034D1]"></i> Notifikasi Stok Menipis</h3>
+            <p class="text-xs text-gray-400 mt-1">Push notifikasi saat stok produk hampir habis</p>
+          </div>
+          <div class="p-5 space-y-4">
+            <!-- Toggle Aktifkan -->
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-semibold text-sm text-gray-800">Aktifkan Notifikasi</p>
+                <p class="text-xs text-gray-400 mt-0.5" id="notifStatusText">Belum diaktifkan</p>
+              </div>
+              <button id="btnToggleNotif" onclick="toggleNotifikasi()" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition-colors duration-200">
+                <span id="notifToggleDot" class="inline-block h-4 w-4 translate-x-1 rounded-full bg-white shadow transition-transform duration-200"></span>
+              </button>
+            </div>
+            <!-- Batas Stok -->
+            <div>
+              <label class="text-sm font-semibold text-gray-700">Batas stok menipis</label>
+              <p class="text-xs text-gray-400 mb-2">Notifikasi dikirim saat stok ≤ angka ini</p>
+              <div class="flex gap-2 items-center">
+                <input type="number" id="inputBatasStok" min="1" max="999" placeholder="10"
+                  class="w-24 px-3 py-2 border border-gray-200 rounded-lg text-sm font-bold text-center">
+                <button onclick="saveBatasStok()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">Simpan</button>
+              </div>
+            </div>
+            <!-- Info produk menipis saat ini -->
+            <div id="stokMenipisPreview" class="hidden">
+              <p class="text-xs font-semibold text-gray-500 mb-2">Produk dengan stok menipis saat ini:</p>
+              <div id="stokMenipisList" class="space-y-1"></div>
+            </div>
+          </div>
+        </div>
 
         <!-- Master Vendor -->
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
@@ -1162,7 +1198,7 @@ function renderDashboard() {
   document.getElementById('dashRevenue').textContent = fmt(rev);
   document.getElementById('dashTrx').textContent = trxToday.length;
   document.getElementById('dashProduk').textContent = produk.length;
-  document.getElementById('dashLow').textContent = produk.filter(p => p.stok < 10).length;
+  document.getElementById('dashLow').textContent = produk.filter(p => p.stok <= getBatasStok()).length;
   const recent = transaksi.slice(-5).reverse();
   document.getElementById('dashRecent').innerHTML = recent.length ? recent.map((x, i) => `
     <div class="bg-gray-50 rounded-lg overflow-hidden">
@@ -2321,6 +2357,7 @@ loadAll().then(() => {
   // Di PC: mulai dari transaksi
   const startPage = isMobile() ? 'dashboard' : 'transaksi';
   showPage(startPage);
+  initNotifikasi();
 });
 
 // ====== PWA: SERVICE WORKER ======
@@ -2364,6 +2401,221 @@ window.addEventListener('popstate', (e) => {
     });
   }
 });
+// ====== ONESIGNAL MANAGER (centralized — semua interaksi OneSignal lewat sini) ======
+const OneSignalManager = (() => {
+  const APP_ID = '2c6265cf-fe87-42bf-863b-54cdfb0ab8cf';
+  let _initialized = false;
+
+  async function init() {
+    if (_initialized) return;
+    if (typeof window.OneSignalDeferred === 'undefined') {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+    }
+    await new Promise((resolve) => {
+      window.OneSignalDeferred.push(async (OneSignal) => {
+        await OneSignal.init({
+          appId: APP_ID,
+          notifyButton: { enable: false },
+          allowLocalhostAsSecureOrigin: true,
+        });
+        _initialized = true;
+        console.log('[OneSignal] Initialized');
+
+        // Observer: saat subscription ID muncul pertama kali
+        OneSignal.User.PushSubscription.addEventListener('change', (e) => {
+          const prev = e.previous?.id;
+          const curr = e.current?.id;
+          if (!prev && curr) {
+            console.log('[OneSignal] Subscription aktif:', curr);
+            refreshNotifUI();
+          }
+        });
+        resolve();
+      });
+    });
+  }
+
+  async function requestPermission() {
+    await init();
+    await window.OneSignal.Notifications.requestPermission();
+    return window.OneSignal.Notifications.permission;
+  }
+
+  function isPermissionGranted() {
+    return typeof window.OneSignal !== 'undefined' &&
+           window.OneSignal.Notifications.permission === true;
+  }
+
+  async function optIn() {
+    await init();
+    await window.OneSignal.User.PushSubscription.optIn();
+  }
+
+  async function optOut() {
+    if (!_initialized) return;
+    await window.OneSignal.User.PushSubscription.optOut();
+  }
+
+  function getSubscriptionId() {
+    return window.OneSignal?.User?.PushSubscription?.id || null;
+  }
+
+  // Kirim push notifikasi ke device ini via OneSignal REST API
+  async function sendNotification(title, body) {
+    const subId = getSubscriptionId();
+    if (!subId) { console.warn('[OneSignal] Tidak ada subscription ID'); return; }
+    try {
+      const res = await fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          app_id: APP_ID,
+          include_subscription_ids: [subId],
+          headings: { en: title, id: title },
+          contents: { en: body,  id: body  },
+          android_accent_color: '0034D1',
+        })
+      });
+      if (res.ok) console.log('[OneSignal] Notifikasi terkirim:', title);
+      else console.warn('[OneSignal] Gagal kirim:', await res.text());
+    } catch (err) {
+      console.error('[OneSignal] Error:', err);
+    }
+  }
+
+  return { init, requestPermission, isPermissionGranted, optIn, optOut, sendNotification };
+})();
+
+// ====== NOTIFIKASI STOK MENIPIS ======
+const LS_NOTIF_ACTIVE = 'kasirpro_notif_active';
+const LS_BATAS_STOK   = 'kasirpro_batas_stok';
+let realtimeChannel = null;
+
+function getBatasStok() {
+  return parseInt(localStorage.getItem(LS_BATAS_STOK) || '10');
+}
+
+function isNotifActive() {
+  return localStorage.getItem(LS_NOTIF_ACTIVE) === '1';
+}
+
+function refreshNotifUI() {
+  const aktif = isNotifActive() && OneSignalManager.isPermissionGranted();
+  const btn = document.getElementById('btnToggleNotif');
+  const dot = document.getElementById('notifToggleDot');
+  const txt = document.getElementById('notifStatusText');
+  const inp = document.getElementById('inputBatasStok');
+  if (!btn) return;
+
+  if (aktif) {
+    btn.classList.add('bg-[#0034D1]');
+    btn.classList.remove('bg-gray-200');
+    dot.style.transform = 'translateX(1.25rem)';
+    txt.textContent = `Aktif · Notif dikirim saat stok ≤ ${getBatasStok()}`;
+  } else {
+    btn.classList.remove('bg-[#0034D1]');
+    btn.classList.add('bg-gray-200');
+    dot.style.transform = 'translateX(0.25rem)';
+    txt.textContent = OneSignalManager.isPermissionGranted() === false
+      ? 'Diblokir — aktifkan notifikasi di pengaturan HP'
+      : 'Belum diaktifkan';
+  }
+  if (inp) inp.value = getBatasStok();
+  renderStokMenipisPreview();
+}
+
+function renderStokMenipisPreview() {
+  const wrap = document.getElementById('stokMenipisPreview');
+  const list = document.getElementById('stokMenipisList');
+  if (!wrap || !list) return;
+  const batas = getBatasStok();
+  const menipis = produk.filter(p => p.stok <= batas).sort((a,b) => a.stok - b.stok);
+  if (!menipis.length) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  list.innerHTML = menipis.map(p => `
+    <div class="flex justify-between items-center bg-red-50 rounded-lg px-3 py-2">
+      <span class="text-sm text-gray-800">${p.nama}</span>
+      <span class="text-xs font-bold ${p.stok === 0 ? 'text-red-600' : 'text-orange-500'}">Stok: ${p.stok}</span>
+    </div>`).join('');
+}
+
+async function toggleNotifikasi() {
+  if (isNotifActive()) {
+    localStorage.setItem(LS_NOTIF_ACTIVE, '0');
+    await OneSignalManager.optOut();
+    stopRealtimeStok();
+    refreshNotifUI();
+    showToast('Notifikasi stok dimatikan');
+    return;
+  }
+  const granted = await OneSignalManager.requestPermission();
+  if (!granted) {
+    showToast('Izin notifikasi ditolak. Aktifkan di pengaturan HP.', 'danger');
+    refreshNotifUI(); return;
+  }
+  await OneSignalManager.optIn();
+  localStorage.setItem(LS_NOTIF_ACTIVE, '1');
+  startRealtimeStok();
+  refreshNotifUI();
+  showToast('Notifikasi stok diaktifkan! ✅');
+}
+
+function saveBatasStok() {
+  const val = parseInt(document.getElementById('inputBatasStok').value);
+  if (!val || val < 1) { showToast('Angka batas tidak valid', 'danger'); return; }
+  localStorage.setItem(LS_BATAS_STOK, val);
+  refreshNotifUI();
+  showToast(`Batas stok disimpan: ≤ ${val}`);
+}
+
+async function kirimNotifStok(produkList) {
+  if (!isNotifActive() || !OneSignalManager.isPermissionGranted()) return;
+  if (!produkList.length) return;
+  const title = '⚠️ Stok Menipis!';
+  const body = produkList.length === 1
+    ? `${produkList[0].nama} tersisa ${produkList[0].stok} unit`
+    : `${produkList.length} produk hampir habis: ${produkList.map(p => p.nama).join(', ')}`;
+  await OneSignalManager.sendNotification(title, body);
+}
+
+function startRealtimeStok() {
+  if (realtimeChannel) return;
+  realtimeChannel = sb.channel('stok-monitor')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'produk' },
+      async (payload) => {
+        const p = mapProduk(payload.new);
+        const batas = getBatasStok();
+        const idx = produk.findIndex(x => x.id === p.id);
+        if (idx !== -1) produk[idx] = p;
+        if (p.stok <= batas) {
+          await kirimNotifStok([p]);
+          document.getElementById('dashLow').textContent =
+            produk.filter(x => x.stok <= batas).length;
+          renderStokMenipisPreview();
+        }
+      })
+    .subscribe();
+}
+
+function stopRealtimeStok() {
+  if (realtimeChannel) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+}
+
+async function initNotifikasi() {
+  await OneSignalManager.init();
+  if (isNotifActive() && OneSignalManager.isPermissionGranted()) {
+    await OneSignalManager.optIn();
+    startRealtimeStok();
+  }
+}
+
+// Hook ke renderSetting agar UI notif ikut refresh
+const _origRenderSetting = renderSetting;
+function renderSetting() {
+  _origRenderSetting();
+  refreshNotifUI();
+}
+
 // Push state kosong agar back button Android bisa ditangkap
 if (window.history && window.history.pushState) {
   window.history.pushState({ page: 'main' }, '', '');
