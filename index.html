@@ -346,26 +346,28 @@
             <p class="text-gray-500">Pantau barang dari Vendor vs beli sendiri di Glosir</p>
           </div>
         </div>
-        <div class="bg-white rounded-2xl p-4 shadow-sm mb-6 flex gap-2 flex-wrap items-center">
-          <label class="text-sm text-gray-600 self-center">Periode:</label>
-          <input type="date" id="rsFrom" class="px-3 py-2 border rounded-lg text-sm">
-          <span class="self-center">s/d</span>
-          <input type="date" id="rsTo" class="px-3 py-2 border rounded-lg text-sm">
-          <button onclick="renderRiwayatStok()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm"><i class="fas fa-filter"></i> Filter</button>
+        <div class="bg-white rounded-2xl p-4 shadow-sm mb-6">
+          <div class="flex gap-2 items-center flex-wrap">
+            <label class="text-sm text-gray-600 shrink-0">Periode:</label>
+            <input type="date" id="rsFrom" class="px-2 py-2 border rounded-lg text-sm min-w-0 flex-1">
+            <span class="self-center shrink-0">s/d</span>
+            <input type="date" id="rsTo" class="px-2 py-2 border rounded-lg text-sm min-w-0 flex-1">
+            <button onclick="renderRiwayatStok()" class="btn-primary text-white px-3 py-2 rounded-lg text-sm shrink-0"><i class="fas fa-filter"></i> Filter</button>
+          </div>
         </div>
         <div class="flex gap-2 mb-6">
           <button type="button" id="rsTabSemua" onclick="setFilterSumberStok('semua')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Semua</button>
           <button type="button" id="rsTabVendor" onclick="setFilterSumberStok('vendor')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Vendor</button>
           <button type="button" id="rsTabGlosir" onclick="setFilterSumberStok('glosir')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Glosir (Beli Sendiri)</button>
         </div>
-        <div class="grid md:grid-cols-2 gap-4 mb-6">
-          <div class="gradient-card text-white p-5 rounded-2xl">
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="gradient-card text-white p-4 rounded-2xl">
             <p class="text-xs opacity-80">Total Belanja dari Vendor</p>
-            <p class="text-2xl font-bold mt-1" id="rsTotalVendor">Rp 0</p>
+            <p class="text-xl font-bold mt-1" id="rsTotalVendor">Rp 0</p>
           </div>
-          <div class="gradient-warning text-white p-5 rounded-2xl">
+          <div class="gradient-warning text-white p-4 rounded-2xl">
             <p class="text-xs opacity-80">Total Belanja Glosir Sendiri</p>
-            <p class="text-2xl font-bold mt-1" id="rsTotalGlosir">Rp 0</p>
+            <p class="text-xl font-bold mt-1" id="rsTotalGlosir">Rp 0</p>
           </div>
         </div>
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
