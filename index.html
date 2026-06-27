@@ -343,7 +343,7 @@
         <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
           <div>
             <h2 class="text-2xl md:text-3xl font-bold">Riwayat Stok Masuk</h2>
-            <p class="text-gray-500">Pantau barang dari Vendor vs beli sendiri di Glosir</p>
+            <p class="text-gray-500">Vendor vs Glosir</p>
           </div>
         </div>
         <div class="bg-white rounded-2xl p-4 shadow-sm mb-6">
@@ -358,15 +358,15 @@
         <div class="flex gap-2 mb-6">
           <button type="button" id="rsTabSemua" onclick="setFilterSumberStok('semua')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Semua</button>
           <button type="button" id="rsTabVendor" onclick="setFilterSumberStok('vendor')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Vendor</button>
-          <button type="button" id="rsTabGlosir" onclick="setFilterSumberStok('glosir')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Glosir (Beli Sendiri)</button>
+          <button type="button" id="rsTabGlosir" onclick="setFilterSumberStok('glosir')" class="flex-1 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600">Glosir</button>
         </div>
         <div class="grid grid-cols-2 gap-3 mb-6">
           <div class="gradient-card text-white p-4 rounded-2xl">
-            <p class="text-xs opacity-80">Total Belanja dari Vendor</p>
+            <p class="text-xs opacity-80">Total Belanja Vendor</p>
             <p class="text-xl font-bold mt-1" id="rsTotalVendor">Rp 0</p>
           </div>
           <div class="gradient-warning text-white p-4 rounded-2xl">
-            <p class="text-xs opacity-80">Total Belanja Glosir Sendiri</p>
+            <p class="text-xs opacity-80">Total Belanja Glosir</p>
             <p class="text-xl font-bold mt-1" id="rsTotalGlosir">Rp 0</p>
           </div>
         </div>
@@ -439,12 +439,14 @@
       <div id="page-laba" class="page hidden">
         <h2 class="text-2xl md:text-3xl font-bold mb-2">Laporan Laba Rugi</h2>
         <p class="text-gray-500 mb-6">Analisis keuntungan bisnis Anda</p>
-        <div class="bg-white rounded-2xl p-4 shadow-sm mb-6 flex gap-2 flex-wrap">
-          <label class="text-sm text-gray-600 self-center">Periode:</label>
-          <input type="date" id="labaFrom" class="px-3 py-2 border rounded-lg text-sm">
-          <span class="self-center">s/d</span>
-          <input type="date" id="labaTo" class="px-3 py-2 border rounded-lg text-sm">
-          <button onclick="renderLaba()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm"><i class="fas fa-filter"></i> Filter</button>
+        <div class="bg-white rounded-2xl p-4 shadow-sm mb-6">
+          <div class="flex gap-2 items-center flex-wrap">
+            <label class="text-sm text-gray-600 shrink-0">Periode:</label>
+            <input type="date" id="labaFrom" class="px-2 py-2 border rounded-lg text-sm min-w-0 flex-1">
+            <span class="self-center shrink-0">s/d</span>
+            <input type="date" id="labaTo" class="px-2 py-2 border rounded-lg text-sm min-w-0 flex-1">
+            <button onclick="renderLaba()" class="btn-primary text-white px-3 py-2 rounded-lg text-sm shrink-0"><i class="fas fa-filter"></i> Filter</button>
+          </div>
         </div>
         <div class="grid md:grid-cols-3 gap-4 mb-6">
           <div class="gradient-card text-white p-6 rounded-2xl">
@@ -607,7 +609,7 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div class="relative">
-                <label class="text-xs text-gray-600">No Faktur (opsional)</label>
+                <label class="text-xs text-gray-600">No Faktur</label>
                 <input type="text" id="pVendorFaktur" placeholder="INV-0001" autocomplete="off"
                   oninput="filterFakturDropdown(this.value)"
                   onfocus="showFakturDropdown()"
@@ -616,11 +618,11 @@
                 <div id="fakturDropdown" class="hidden absolute left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1 max-h-40 overflow-y-auto"></div>
               </div>
               <div>
-                <label class="text-xs text-gray-600">Jatuh Tempo (opsional)</label>
+                <label class="text-xs text-gray-600">Jatuh Tempo</label>
                 <input type="date" id="pVendorTempo" class="w-full px-3 py-2 border rounded-lg mt-1">
               </div>
             </div>
-            <p class="text-xs text-gray-500"><i class="fas fa-circle-info mr-1"></i>Otomatis tercatat sebagai Hutang Vendor sebesar Stok Baru × HPP Stok Baru.</p>
+            <p class="text-xs text-gray-500"><i class="fas fa-circle-info mr-1"></i>Tercatat sebagai Hutang Vendor</p>
           </div>
 
           <p class="text-xs text-gray-500">
@@ -1893,7 +1895,7 @@ function renderRiwayatStok() {
   document.getElementById('riwayatStokTable').innerHTML = grouped.map((g, gi) => {
     const badge = g.sumber === 'vendor'
       ? `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Vendor${g.vendorNama ? ': ' + g.vendorNama : ''}</span>`
-      : `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Glosir Sendiri</span>`;
+      : `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Glosir</span>`;
 
     if (g.key) {
       // Multi-item grouped by faktur
