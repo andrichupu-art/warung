@@ -128,10 +128,12 @@
   }
 
   @media (max-width: 768px) {
-    .desktop-sidebar { display: none; }
-    .bottom-nav { display: flex; }
-    .main-content { padding-bottom: calc(68px + var(--sab)); }
-    .sidebar-toggle { display: none; }
+    .desktop-sidebar { display: none !important; }
+    #sidebar { display: none !important; }
+    #sidebarShowBtn { display: none !important; }
+    .bottom-nav { display: flex !important; }
+    .main-content { padding-bottom: calc(68px + var(--sab)) !important; margin-left: 0 !important; }
+    .sidebar-toggle { display: none !important; }
     .bottom-nav {
       padding-bottom: calc(4px + var(--sab));
       padding-left: var(--sal);
@@ -147,7 +149,7 @@
     .table-mobile-cards td::before { content: attr(data-label); font-weight: 600; color: #94a3b8; flex-shrink: 0; margin-right: 0.5rem; }
   }
   @media (min-width: 769px) {
-    .bottom-nav { display: none; }
+    .bottom-nav { display: none !important; }
   }
   .btn-primary { background: linear-gradient(135deg, #0034D1, #2F5BFF); }
   .btn-primary:hover { opacity: 0.9; }
@@ -170,7 +172,7 @@
 
 <div class="flex min-h-screen">
   <!-- SIDEBAR DESKTOP -->
-  <aside id="sidebar" class="desktop-sidebar sidebar gradient-bg w-64 text-white flex flex-col fixed h-screen z-20">
+  <aside id="sidebar" class="desktop-sidebar sidebar gradient-bg w-64 text-white flex-col fixed h-screen z-20 hidden md:flex">
     <div class="p-6 border-b border-white/20 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -219,7 +221,7 @@
   </button>
 
   <!-- MAIN CONTENT -->
-  <main class="flex-1 md:ml-64 main-content" id="mainContent">
+  <main class="flex-1 md:ml-64 main-content w-full" id="mainContent">
     <!-- HEADER MOBILE -->
     <header class="md:hidden gradient-bg text-white p-4 flex items-center justify-between sticky top-0 z-30 mobile-header" style="padding-top: calc(1rem + env(safe-area-inset-top, 0px));">
       <div class="flex items-center gap-2">
@@ -1095,6 +1097,7 @@ document.addEventListener('click', (e) => {
 
 // ====== SIDEBAR TOGGLE ======
 function toggleSidebar() {
+  if (isMobile()) return; // sidebar tidak ada di mobile
   const sidebar = document.getElementById('sidebar');
   const mainContent = document.getElementById('mainContent');
   const showBtn = document.getElementById('sidebarShowBtn');
