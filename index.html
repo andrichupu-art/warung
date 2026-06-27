@@ -164,6 +164,19 @@
   }
   .toast.show { opacity: 1; transform: translateY(0); }
 
+
+  /* === MOBILE-ONLY TABLE COMPACT (< 768px) === */
+  @media (max-width: 767px) {
+    .mob-p { padding: 0.375rem !important; }
+    .mob-fs { font-size: 10px !important; }
+    .mob-fs-sm { font-size: 11px !important; }
+    .mob-icon { width: 1.75rem !important; height: 1.75rem !important; }
+    .mob-icon-sm { width: 1.75rem !important; height: 1.75rem !important; font-size: 10px !important; }
+    .mob-badge { padding: 0.125rem 0.375rem !important; font-size: 10px !important; }
+    .mob-gap { gap: 0.125rem !important; }
+    .mob-th { padding: 0.375rem !important; font-size: 10px !important; }
+    .mob-truncate { max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
 </style>
 </head>
 <body>
@@ -412,11 +425,12 @@
             <table class="w-full text-sm">
               <thead class="bg-gray-50 text-gray-600">
                 <tr>
-                  <th class="text-left p-2 text-xs">Produk</th>
-                  <th class="text-center p-2 text-xs">HPP</th>
-                  <th class="text-center p-2 text-xs">Harga Jual</th>
-                  <th class="text-center p-2 text-xs">Stok</th>
-                  <th class="text-center p-2 text-xs">Aksi</th>
+                <tr>
+                  <th class="text-center p-3 mob-th">Produk</th>
+                  <th class="text-center p-3 mob-th">HPP</th>
+                  <th class="text-center p-3 mob-th">Harga Jual</th>
+                  <th class="text-center p-3 mob-th">Stok</th>
+                  <th class="text-center p-3 mob-th">Aksi</th>
                 </tr>
               </thead>
               <tbody id="stokTable"></tbody>
@@ -462,11 +476,12 @@
             <table class="w-full text-sm">
               <thead class="bg-gray-50 text-gray-600">
                 <tr>
-                  <th class="text-center p-3">Tanggal</th>
-                  <th class="text-center p-3">No Faktur</th>
-                  <th class="text-center p-3">Total</th>
-                  <th class="text-center p-3">Sumber</th>
-                  <th class="text-center p-3">Aksi</th>
+                <tr>
+                  <th class="text-center p-3 mob-th">Tanggal</th>
+                  <th class="text-center p-3 mob-th">No Faktur</th>
+                  <th class="text-center p-3 mob-th">Total</th>
+                  <th class="text-center p-3 mob-th">Sumber</th>
+                  <th class="text-center p-3 mob-th">Aksi</th>
                 </tr>
               </thead>
               <tbody id="riwayatStokTable"></tbody>
@@ -500,15 +515,15 @@
             <table class="w-full text-sm">
               <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
                 <tr>
-                  <th class="text-center p-2">Tanggal</th>
-                  <th class="text-center p-2 hidden md:table-cell">No Faktur</th>
-                  <th class="text-center p-2">Vendor</th>
-                  <th class="text-center p-2 hidden md:table-cell">Kategori</th>
-                  <th class="text-center p-2">Total</th>
-                  <th class="text-center p-2 hidden md:table-cell">Terbayar</th>
-                  <th class="text-center p-2 hidden md:table-cell">Jatuh Tempo</th>
-                  <th class="text-center p-2">Status</th>
-                  <th class="text-center p-2">Aksi</th>
+                  <th class="text-center p-2 mob-th">Tanggal</th>
+                  <th class="text-center p-2 mob-th hidden md:table-cell">No Faktur</th>
+                  <th class="text-center p-2 mob-th">Vendor</th>
+                  <th class="text-center p-2 mob-th hidden md:table-cell">Kategori</th>
+                  <th class="text-center p-2 mob-th">Total</th>
+                  <th class="text-center p-2 mob-th hidden md:table-cell">Terbayar</th>
+                  <th class="text-center p-2 mob-th hidden md:table-cell">Jatuh Tempo</th>
+                  <th class="text-center p-2 mob-th">Status</th>
+                  <th class="text-center p-2 mob-th">Aksi</th>
                 </tr>
               </thead>
               <tbody id="vendorTable"></tbody>
@@ -1700,23 +1715,23 @@ function renderStok() {
   const list = produk.filter(p => p.nama.toLowerCase().includes(q));
   document.getElementById('stokTable').innerHTML = list.map(p => `
     <tr class="border-t hover:bg-gray-50">
-      <td class="p-1.5 cursor-pointer" onclick="openProdukModal(${p.id})" title="Klik untuk edit produk">
-        <div class="flex items-center gap-1.5">
-          <div class="w-7 h-7 gradient-card rounded-md flex items-center justify-center text-white shrink-0"><i class="fas fa-box" style="font-size:10px"></i></div>
+      <td class="p-3 mob-p cursor-pointer" onclick="openProdukModal(${p.id})" title="Klik untuk edit produk">
+        <div class="flex items-center gap-2 mob-gap">
+          <div class="w-8 h-8 mob-icon gradient-card rounded-lg flex items-center justify-center text-white shrink-0"><i class="fas fa-box text-xs"></i></div>
           <div class="min-w-0">
-            <p class="font-semibold text-xs leading-tight truncate max-w-[80px]">${p.nama}</p>
-            <p class="text-gray-500 leading-tight" style="font-size:10px">${p.kategori}</p>
+            <p class="font-semibold text-sm mob-fs-sm mob-truncate">${p.nama}</p>
+            <p class="text-xs text-gray-500 mob-fs">${p.kategori}</p>
           </div>
         </div>
       </td>
-      <td class="p-1.5 text-center" style="font-size:10px">${fmt(p.hpp)}</td>
-      <td class="p-1.5 text-center font-semibold" style="font-size:10px">${fmt(p.harga)}</td>
-      <td class="p-1.5 text-center"><span class="px-1.5 py-0.5 rounded-full font-semibold ${p.stok<10?'bg-red-100 text-red-700':'bg-green-100 text-green-700'}" style="font-size:10px">${p.stok}</span></td>
-      <td class="p-1.5 text-center">
-        <div class="flex gap-0.5 justify-center">
-          <button onclick="toggleNotifProduk(${p.id})" class="w-7 h-7 rounded-md ${p.notifStok ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}" title="${p.notifStok ? 'Notifikasi ON — klik untuk matikan' : 'Notifikasi OFF — klik untuk aktifkan'}"><i class="fas ${p.notifStok ? 'fa-bell' : 'fa-bell-slash'}" style="font-size:10px"></i></button>
-          <button onclick="openRetur(${p.id})" class="w-7 h-7 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200" title="Retur"><i class="fas fa-rotate-left" style="font-size:10px"></i></button>
-          <button onclick="hapusProduk(${p.id})" class="w-7 h-7 bg-red-100 text-red-600 rounded-md hover:bg-red-200" title="Hapus"><i class="fas fa-trash" style="font-size:10px"></i></button>
+      <td class="p-3 mob-p text-center text-sm mob-fs">${fmt(p.hpp)}</td>
+      <td class="p-3 mob-p text-center font-semibold text-sm mob-fs">${fmt(p.harga)}</td>
+      <td class="p-3 mob-p text-center"><span class="px-2 py-1 mob-badge rounded-full text-xs font-semibold ${p.stok<10?'bg-red-100 text-red-700':'bg-green-100 text-green-700'}">${p.stok}</span></td>
+      <td class="p-3 mob-p text-center">
+        <div class="flex gap-1 mob-gap justify-center">
+          <button onclick="toggleNotifProduk(${p.id})" class="w-8 h-8 mob-icon rounded-lg ${p.notifStok ? 'bg-blue-100 text-blue-600 hover:bg-blue-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}" title="${p.notifStok ? 'Notifikasi ON — klik untuk matikan' : 'Notifikasi OFF — klik untuk aktifkan'}"><i class="fas ${p.notifStok ? 'fa-bell' : 'fa-bell-slash'} text-xs"></i></button>
+          <button onclick="openRetur(${p.id})" class="w-8 h-8 mob-icon bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" title="Retur"><i class="fas fa-rotate-left text-xs"></i></button>
+          <button onclick="hapusProduk(${p.id})" class="w-8 h-8 mob-icon bg-red-100 text-red-600 rounded-lg hover:bg-red-200" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
         </div>
       </td>
     </tr>`).join('') || '<tr><td colspan="5" class="p-6 text-center text-gray-400">Tidak ada produk</td></tr>';
@@ -2142,32 +2157,32 @@ function renderRiwayatStok() {
 
   document.getElementById('riwayatStokTable').innerHTML = grouped.map((g, gi) => {
     const badge = g.sumber === 'vendor'
-      ? `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Vendor${g.vendorNama ? ': ' + g.vendorNama : ''}</span>`
-      : `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Glosir</span>`;
+      ? `<span class="px-2 py-1 mob-badge rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Vendor${g.vendorNama ? ': ' + g.vendorNama : ''}</span>`
+      : `<span class="px-2 py-1 mob-badge rounded-full text-xs font-semibold bg-orange-100 text-orange-700">Glosir</span>`;
 
     if (g.key) {
       // Multi-item grouped by faktur
       const detailRows = g.items.map(r =>
         `<tr id="rs-detail-${gi}-${r.id}" class="hidden bg-gray-50 border-t border-dashed border-gray-200">
-          <td class="px-3 py-2 pl-8 text-gray-400 text-xs">${new Date(r.tanggal).toLocaleDateString('id-ID')}</td>
-          <td class="px-3 py-2 text-xs text-gray-600">${r.namaProduk} <span class="text-gray-400">×${r.jumlah}</span></td>
-          <td class="px-3 py-2 text-xs">${fmt(r.totalBeli)}</td>
-          <td class="px-3 py-2"></td>
-          <td class="px-3 py-2">
+          <td class="px-3 py-2 mob-p pl-8 text-gray-400 text-xs mob-fs">${new Date(r.tanggal).toLocaleDateString('id-ID')}</td>
+          <td class="px-3 py-2 mob-p text-xs mob-fs text-gray-600">${r.namaProduk} <span class="text-gray-400">×${r.jumlah}</span></td>
+          <td class="px-3 py-2 mob-p text-xs mob-fs">${fmt(r.totalBeli)}</td>
+          <td class="px-3 py-2 mob-p"></td>
+          <td class="px-3 py-2 mob-p">
             <button onclick="hapusRiwayatStok(${r.id})" class="w-6 h-6 bg-red-100 text-red-600 rounded hover:bg-red-200" title="Hapus"><i class="fas fa-trash text-[10px]"></i></button>
           </td>
         </tr>`
       ).join('');
       return `
       <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="toggleRsGroup(${gi}, ${g.items.length})">
-        <td class="p-3 text-sm">${new Date(g.tanggal).toLocaleDateString('id-ID')}</td>
-        <td class="p-3">
-          <p class="font-semibold text-sm">${g.noFaktur}</p>
-          <p class="text-xs text-gray-400">${g.items.length} produk <i id="rs-chevron-${gi}" class="fas fa-chevron-down text-[10px] ml-1 transition-transform"></i></p>
+        <td class="p-3 mob-p text-sm mob-fs text-gray-600">${new Date(g.tanggal).toLocaleDateString('id-ID')}</td>
+        <td class="p-3 mob-p">
+          <p class="font-semibold text-sm mob-fs-sm">${g.noFaktur}</p>
+          <p class="text-xs mob-fs text-gray-400">${g.items.length} produk <i id="rs-chevron-${gi}" class="fas fa-chevron-down text-[10px] ml-1 transition-transform"></i></p>
         </td>
-        <td class="p-3 font-semibold">${fmt(g.totalBeli)}</td>
-        <td class="p-3">${badge}</td>
-        <td class="p-3"></td>
+        <td class="p-3 mob-p font-semibold text-sm mob-fs text-center">${fmt(g.totalBeli)}</td>
+        <td class="p-3 mob-p text-center">${badge}</td>
+        <td class="p-3 mob-p"></td>
       </tr>
       ${detailRows}`;
     } else {
@@ -2175,15 +2190,15 @@ function renderRiwayatStok() {
       const r = g.single;
       return `
       <tr class="border-t hover:bg-gray-50">
-        <td class="p-3">${new Date(r.tanggal).toLocaleDateString('id-ID')}</td>
-        <td class="p-3">
-          <p class="font-semibold text-sm">${r.namaProduk}</p>
-          <p class="text-xs text-gray-400">×${r.jumlah}</p>
+        <td class="p-3 mob-p text-sm mob-fs text-gray-600">${new Date(r.tanggal).toLocaleDateString('id-ID')}</td>
+        <td class="p-3 mob-p">
+          <p class="font-semibold text-sm mob-fs-sm">${r.namaProduk}</p>
+          <p class="text-xs mob-fs text-gray-400">×${r.jumlah}</p>
         </td>
-        <td class="p-3">${fmt(r.totalBeli)}</td>
-        <td class="p-3">${badge}</td>
-        <td class="p-3">
-          <button onclick="hapusRiwayatStok(${r.id})" class="w-8 h-8 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" title="Hapus catatan"><i class="fas fa-trash text-xs"></i></button>
+        <td class="p-3 mob-p text-sm mob-fs text-center">${fmt(r.totalBeli)}</td>
+        <td class="p-3 mob-p text-center">${badge}</td>
+        <td class="p-3 mob-p text-center">
+          <button onclick="hapusRiwayatStok(${r.id})" class="w-8 h-8 mob-icon bg-red-100 text-red-600 rounded-lg hover:bg-red-200" title="Hapus catatan"><i class="fas fa-trash text-xs"></i></button>
         </td>
       </tr>`;
     }
@@ -2275,7 +2290,7 @@ function renderVendor() {
   const todayStr = today();
   document.getElementById('vendorTable').innerHTML = vendor.map(v => {
     const sisa = v.total - v.paid;
-    const status = sisa <= 0 ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Lunas</span>' : '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs">Belum Lunas</span>';
+    const status = sisa <= 0 ? '<span class="px-2 py-1 mob-badge bg-green-100 text-green-700 rounded-full text-xs">Lunas</span>' : '<span class="px-2 py-1 mob-badge bg-red-100 text-red-700 rounded-full text-xs">Belum Lunas</span>';
     const lewatTempo = sisa > 0 && v.jatuhTempo && v.jatuhTempo < todayStr;
     const tempoText = v.jatuhTempo ? new Date(v.jatuhTempo).toLocaleDateString('id-ID') : '-';
     const tempo = lewatTempo
@@ -2285,19 +2300,19 @@ function renderVendor() {
       ? [...new Set(v.items.map(i => i.kategori).filter(Boolean))].join(', ')
       : (v.ket || '-');
     return `
-    <tr class="border-t hover:bg-gray-50 text-xs">
-      <td class="p-2 text-center text-gray-600">${new Date(v.tanggal).toLocaleDateString('id-ID')}</td>
-      <td class="p-2 text-center text-gray-500 hidden md:table-cell">${v.noFaktur || '-'}</td>
-      <td class="p-2 text-center font-semibold cursor-pointer text-[#0034D1] hover:underline" onclick="bukaRincianVendor(${v.id})" title="Klik untuk lihat rincian">${v.nama}${v.items && v.items.length > 1 ? ' <span class=\'text-gray-400 font-normal\'>('+v.items.length+' produk)</span>' : ''}</td>
-      <td class="p-2 text-center text-gray-600 hidden md:table-cell">${ketDisplay}</td>
-      <td class="p-2 text-center font-medium">${fmt(v.total)}</td>
-      <td class="p-2 text-center text-green-600 font-medium hidden md:table-cell">${fmt(v.paid)}</td>
-      <td class="p-2 text-center hidden md:table-cell">${tempo}</td>
-      <td class="p-2 text-center">${status}</td>
-      <td class="p-2 text-center">
-        <div class="flex gap-1 justify-center">
-          <button onclick="openVendorModal(${v.id})" class="w-7 h-7 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" title="Edit"><i class="fas fa-pen text-xs"></i></button>
-          <button onclick="hapusVendor(${v.id})" class="w-7 h-7 bg-red-100 text-red-600 rounded-lg hover:bg-red-200" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
+    <tr class="border-t hover:bg-gray-50">
+      <td class="p-2 mob-p text-gray-600 text-sm mob-fs">${new Date(v.tanggal).toLocaleDateString('id-ID')}</td>
+      <td class="p-2 mob-p text-center text-gray-500 text-sm mob-fs hidden md:table-cell">${v.noFaktur || '-'}</td>
+      <td class="p-2 mob-p font-semibold cursor-pointer text-[#0034D1] hover:underline text-sm mob-fs-sm" onclick="bukaRincianVendor(${v.id})" title="Klik untuk lihat rincian">${v.nama}${v.items && v.items.length > 1 ? ' <span class=\'text-gray-400 font-normal text-xs mob-fs\'>('+v.items.length+' produk)</span>' : ''}</td>
+      <td class="p-2 mob-p text-center text-gray-600 text-sm mob-fs hidden md:table-cell">${ketDisplay}</td>
+      <td class="p-2 mob-p text-center font-medium text-sm mob-fs">${fmt(v.total)}</td>
+      <td class="p-2 mob-p text-center text-green-600 font-medium text-sm mob-fs hidden md:table-cell">${fmt(v.paid)}</td>
+      <td class="p-2 mob-p text-center text-sm mob-fs hidden md:table-cell">${tempo}</td>
+      <td class="p-2 mob-p text-center">${status}</td>
+      <td class="p-2 mob-p text-center">
+        <div class="flex gap-1 mob-gap justify-center">
+          <button onclick="openVendorModal(${v.id})" class="w-7 h-7 mob-icon bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200" title="Edit"><i class="fas fa-pen text-xs"></i></button>
+          <button onclick="hapusVendor(${v.id})" class="w-7 h-7 mob-icon bg-red-100 text-red-600 rounded-lg hover:bg-red-200" title="Hapus"><i class="fas fa-trash text-xs"></i></button>
         </div>
       </td>
     </tr>`;
